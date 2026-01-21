@@ -137,8 +137,8 @@ class ComplianceLog extends Model
         }
 
         $scheduledDateTime = Carbon::parse($this->scheduled_date->format('Y-m-d') . ' ' . $this->scheduled_time);
-        
-        return Carbon::now()->gt($scheduledDateTime->addMinutes(30));
+
+        return Carbon::now()->gt($scheduledDateTime->copy()->addMinutes(30));
     }
 
     /**

@@ -44,6 +44,14 @@
                     <span>Jadwal Obat</span>
                 </a>
             </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Komunikasi</div>
+                <a href="{{ route('admin.emails.create') }}" class="nav-item {{ request()->routeIs('admin.emails.*') ? 'active' : '' }}">
+                    <i class="fas fa-envelope"></i>
+                    <span>Kirim Email</span>
+                </a>
+            </div>
             
             <div class="nav-section">
                 <div class="nav-section-title">Akun</div>

@@ -20,9 +20,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px;
+            padding: 40px 20px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         /* Animated Background */
@@ -334,7 +335,14 @@
                     dengan Notifikasi Email Otomatis dan Monitoring Real-Time
                 </p>
             </div>
-            
+
+            @if(session('success'))
+                <div style="background: linear-gradient(135deg, #ECFDF5, #D1FAE5); border: 2px solid #10B981; border-radius: 16px; padding: 20px; margin-bottom: 32px; display: flex; align-items: center; gap: 16px; animation: fadeIn 0.5s ease-out;">
+                    <i class="fas fa-check-circle" style="font-size: 28px; color: #059669;"></i>
+                    <span style="color: #065F46; font-size: 15px; font-weight: 600;">{{ session('success') }}</span>
+                </div>
+            @endif
+
             <div class="role-grid">
                 <a href="{{ route('login') }}" class="role-card">
                     <div class="role-icon">

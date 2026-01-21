@@ -669,15 +669,364 @@
         .mt-4 { margin-top: 16px; }
         .mb-4 { margin-bottom: 16px; }
         .hidden { display: none; }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 320px;
+            max-width: 420px;
+            pointer-events: all;
+            animation: slideInRight 0.3s ease-out;
+            border-left: 4px solid var(--primary);
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .toast.toast-success { border-left-color: var(--success); }
+        .toast.toast-error { border-left-color: var(--danger); }
+        .toast.toast-warning { border-left-color: var(--warning); }
+        .toast.toast-info { border-left-color: var(--info); }
+
+        .toast-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .toast-success .toast-icon { color: var(--success); }
+        .toast-error .toast-icon { color: var(--danger); }
+        .toast-warning .toast-icon { color: var(--warning); }
+        .toast-info .toast-icon { color: var(--info); }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: var(--text);
+        }
+
+        /* Modal System */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 28px 32px 20px;
+            border-bottom: 2px solid var(--bg);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .modal-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .modal-icon.success { background: var(--success-light); color: var(--success); }
+        .modal-icon.error { background: var(--danger-light); color: var(--danger); }
+        .modal-icon.warning { background: var(--warning-light); color: var(--warning); }
+        .modal-icon.info { background: var(--info-light); color: var(--info); }
+
+        .modal-header-text h3 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .modal-header-text p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: 24px 32px;
+        }
+
+        .modal-footer {
+            padding: 20px 32px 28px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-footer .btn {
+            min-width: 100px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Toast */
+        @media (max-width: 768px) {
+            .toast-container {
+                left: 20px;
+                right: 20px;
+            }
+
+            .toast {
+                min-width: auto;
+                max-width: none;
+            }
+        }
     </style>
     @stack('styles')
 </head>
 <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     @yield('body')
-    
+
     <script>
-        // Flash message auto-hide
+        // Toast Notification System
+        const Toast = {
+            container: null,
+
+            init() {
+                this.container = document.getElementById('toastContainer');
+            },
+
+            show(type, title, message, duration = 5000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+
+                toast.innerHTML = `
+                    <i class="fas ${icons[type]} toast-icon"></i>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="Toast.close(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+
+                this.container.appendChild(toast);
+
+                if (duration > 0) {
+                    setTimeout(() => this.close(toast.querySelector('.toast-close')), duration);
+                }
+
+                return toast;
+            },
+
+            success(title, message, duration) {
+                return this.show('success', title, message, duration);
+            },
+
+            error(title, message, duration) {
+                return this.show('error', title, message, duration);
+            },
+
+            warning(title, message, duration) {
+                return this.show('warning', title, message, duration);
+            },
+
+            info(title, message, duration) {
+                return this.show('info', title, message, duration);
+            },
+
+            close(button) {
+                const toast = button.closest('.toast');
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100px)';
+                setTimeout(() => toast.remove(), 300);
+            }
+        };
+
+        // Modal System
+        const Modal = {
+            show(options) {
+                const {
+                    type = 'info',
+                    title = 'Confirmation',
+                    message = '',
+                    confirmText = 'Confirm',
+                    cancelText = 'Cancel',
+                    onConfirm = () => {},
+                    onCancel = () => {}
+                } = options;
+
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-times-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.innerHTML = `
+                    <div class="modal-box">
+                        <div class="modal-header">
+                            <div class="modal-icon ${type}">
+                                <i class="fas ${icons[type]}"></i>
+                            </div>
+                            <div class="modal-header-text">
+                                <h3>${title}</h3>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">
+                                ${message}
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="Modal.close(this, false)">
+                                ${cancelText}
+                            </button>
+                            <button class="btn btn-primary" onclick="Modal.close(this, true)">
+                                ${confirmText}
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                overlay._onConfirm = onConfirm;
+                overlay._onCancel = onCancel;
+
+                // Close on overlay click
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        this.close(overlay, false);
+                    }
+                });
+
+                document.body.appendChild(overlay);
+                return overlay;
+            },
+
+            confirm(title, message, onConfirm, onCancel) {
+                return this.show({
+                    type: 'warning',
+                    title,
+                    message,
+                    confirmText: 'Ya, Lanjutkan',
+                    cancelText: 'Batal',
+                    onConfirm,
+                    onCancel
+                });
+            },
+
+            close(element, confirmed) {
+                const overlay = element.closest('.modal-overlay');
+                if (!overlay) return;
+
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    if (confirmed && overlay._onConfirm) {
+                        overlay._onConfirm();
+                    } else if (!confirmed && overlay._onCancel) {
+                        overlay._onCancel();
+                    }
+                    overlay.remove();
+                }, 200);
+            }
+        };
+
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            Toast.init();
+
+            // Auto-hide flash messages
             const alerts = document.querySelectorAll('.alert-flash');
             alerts.forEach(alert => {
                 setTimeout(() => {
@@ -686,7 +1035,46 @@
                     setTimeout(() => alert.remove(), 300);
                 }, 5000);
             });
+
+            // Show toast for session messages
+            @if(session('success'))
+                Toast.success('Berhasil!', '{{ session('success') }}');
+            @endif
+
+            @if(session('error'))
+                Toast.error('Gagal!', '{{ session('error') }}');
+            @endif
+
+            @if(session('warning'))
+                Toast.warning('Perhatian!', '{{ session('warning') }}');
+            @endif
+
+            @if(session('info'))
+                Toast.info('Informasi', '{{ session('info') }}');
+            @endif
         });
+
+        // Helper function for form submissions with confirmation
+        function confirmAction(message, formId) {
+            Modal.confirm(
+                'Konfirmasi Tindakan',
+                message,
+                () => document.getElementById(formId).submit()
+            );
+            return false;
+        }
+
+        // Helper for AJAX actions
+        function showLoading(button) {
+            button.disabled = true;
+            button.dataset.originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner"></span> Memproses...';
+        }
+
+        function hideLoading(button) {
+            button.disabled = false;
+            button.innerHTML = button.dataset.originalText;
+        }
     </script>
     @stack('scripts')
 </body>

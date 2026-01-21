@@ -20,9 +20,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         /* Animated Background Elements */
@@ -198,22 +199,44 @@
             color: #B8A0A0;
         }
 
+        /* Password Input - extra right padding for toggle button */
+        .password-input {
+            padding-right: 52px !important;
+        }
+
         /* Password Toggle */
         .password-toggle {
             position: absolute;
             right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            background: none;
+            background: rgba(255, 255, 255, 0.8);
             border: none;
             color: #8B7373;
             cursor: pointer;
-            padding: 4px;
-            transition: color 0.3s ease;
+            padding: 8px;
+            transition: all 0.3s ease;
+            z-index: 10;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
         }
 
         .password-toggle:hover {
             color: #7B0000;
+            background: rgba(123, 0, 0, 0.05);
+        }
+
+        .password-toggle:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .password-toggle i {
+            font-size: 16px;
+            pointer-events: none;
         }
 
         /* Remember Me & Forgot Password */
@@ -451,7 +474,7 @@
                     <div class="input-wrapper">
                         <input type="password" 
                                name="password" 
-                               class="form-input" 
+                               class="form-input password-input" 
                                id="password"
                                placeholder="Masukkan password Anda"
                                required>

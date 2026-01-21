@@ -127,11 +127,28 @@
                 <span class="form-error">{{ $message }}</span>
             @enderror
         </div>
-        
+
+        <div class="divider" style="margin: 32px 0;"></div>
+
+        <!-- Email Reminder Toggle -->
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 20px; background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border-radius: 12px; border: 2px solid #3B82F6;">
+                <input type="checkbox" name="send_email_reminder" value="1" checked style="width: 20px; height: 20px; accent-color: #3B82F6; cursor: pointer;">
+                <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 700; color: #1E40AF; margin-bottom: 4px;">
+                        <i class="fas fa-envelope"></i> Kirim Email Pengingat Otomatis
+                    </div>
+                    <div style="font-size: 13px; color: #1E3A8A;">
+                        Pasien akan menerima email pengingat 30 menit sebelum setiap waktu minum obat via Resend
+                    </div>
+                </div>
+            </label>
+        </div>
+
         <div class="alert alert-info">
             <i class="fas fa-info-circle"></i>
             <div>
-                <strong>Email reminder otomatis:</strong> Pasien akan menerima email pengingat 30 menit sebelum setiap jadwal minum obat.
+                <strong>Info:</strong> Email akan dikirim ke <strong>{{ $selectedPatient ? $selectedPatient->email : 'email pasien' }}</strong>. Pastikan email pasien sudah benar.
             </div>
         </div>
         

@@ -16,10 +16,8 @@ class AuthController extends Controller
      */
     public function showLoginForm()
     {
-        if (Auth::check()) {
-            return $this->redirectBasedOnRole();
-        }
-        
+        // The 'guest' middleware already handles authenticated users
+        // No need for additional check here
         return view('auth.login');
     }
 
@@ -49,10 +47,8 @@ class AuthController extends Controller
      */
     public function showRegisterForm()
     {
-        if (Auth::check()) {
-            return $this->redirectBasedOnRole();
-        }
-        
+        // The 'guest' middleware already handles authenticated users
+        // No need for additional check here
         return view('auth.register');
     }
 
@@ -94,7 +90,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')
+        return redirect()->route('home')
             ->with('success', 'Anda telah berhasil keluar.');
     }
 

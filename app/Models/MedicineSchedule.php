@@ -23,6 +23,7 @@ class MedicineSchedule extends Model
         'end_date',
         'notes',
         'is_active',
+        'send_email_reminder',
         'created_by',
     ];
 
@@ -31,6 +32,7 @@ class MedicineSchedule extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'is_active' => 'boolean',
+        'send_email_reminder' => 'boolean',
     ];
 
     /**

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Medicine;
 use App\Models\MedicineSchedule;
 use App\Models\ComplianceLog;
+use App\Services\ResendMailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -71,17 +72,24 @@ class ScheduleController extends Controller
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after:start_date'],
             'notes' => ['nullable', 'string'],
+            'send_email_reminder' => ['nullable', 'boolean'],
         ]);
 
         $validated['created_by'] = Auth::id();
+        $validated['send_email_reminder'] = $request->has('send_email_reminder');
 
         $schedule = MedicineSchedule::create($validated);
 
         // Generate compliance logs for the schedule period
         $this->generateComplianceLogs($schedule);
 
+        // Send notification email to patient about new schedule
+        if ($schedule->send_email_reminder) {
+            $this->sendScheduleNotification($schedule, 'created');
+        }
+
         return redirect()->route('admin.schedules.index')
-            ->with('success', 'Jadwal obat berhasil dibuat!');
+            ->with('success', 'Jadwal obat berhasil dibuat! ' . ($schedule->send_email_reminder ? 'Email reminder akan dikirim otomatis.' : ''));
     }
 
     /**
@@ -115,18 +123,34 @@ class ScheduleController extends Controller
      */
     public function update(Request $request, MedicineSchedule $schedule)
     {
+        $oldSchedule = clone $schedule;
+
         $validated = $request->validate([
             'dosage' => ['required', 'string', 'max:100'],
             'frequency_per_day' => ['required', 'integer', 'min:1', 'max:6'],
             'time_slots' => ['required', 'array', 'min:1'],
             'time_slots.*' => ['required', 'date_format:H:i'],
             'instruction' => ['required', 'string', 'max:255'],
-            'end_date' => ['required', 'date', 'after:start_date'],
+            'end_date' => ['required', 'date', 'after_or_equal:' . $schedule->start_date->format('Y-m-d')],
             'notes' => ['nullable', 'string'],
             'is_active' => ['boolean'],
+            'send_email_reminder' => ['nullable', 'boolean'],
         ]);
 
+        $validated['send_email_reminder'] = $request->has('send_email_reminder');
         $schedule->update($validated);
+
+        // Send notification if schedule changed and email is enabled
+        if ($schedule->send_email_reminder) {
+            $hasChanged = $oldSchedule->time_slots != $schedule->time_slots ||
+                         $oldSchedule->notes != $schedule->notes ||
+                         $oldSchedule->dosage != $schedule->dosage ||
+                         $oldSchedule->instruction != $schedule->instruction;
+
+            if ($hasChanged) {
+                $this->sendScheduleNotification($schedule, 'updated');
+            }
+        }
 
         return redirect()->route('admin.schedules.index')
             ->with('success', 'Jadwal obat berhasil diperbarui!');
@@ -162,6 +186,36 @@ class ScheduleController extends Controller
                 ]);
             }
             $startDate->addDay();
+        }
+    }
+
+    /**
+     * Send schedule notification email to patient
+     */
+    protected function sendScheduleNotification(MedicineSchedule $schedule, string $action = 'created')
+    {
+        try {
+            $schedule->load(['user', 'medicine']);
+            $resendService = new ResendMailService();
+
+            $subject = $action === 'created'
+                ? '📋 Jadwal Obat Baru - ' . $schedule->medicine->name
+                : '🔔 Perubahan Jadwal Obat - ' . $schedule->medicine->name;
+
+            $html = view('emails.schedule-notification', [
+                'user' => $schedule->user,
+                'schedule' => $schedule,
+                'action' => $action
+            ])->render();
+
+            $resendService->send([
+                'to' => [$schedule->user->email],
+                'subject' => $subject,
+                'html' => $html
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to send schedule notification: ' . $e->getMessage());
         }
     }
 }

@@ -14,6 +14,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+
+        // Configure guest middleware to use our custom redirect
+        $middleware->redirectGuestsTo(fn () => route('login'));
+
+        $middleware->redirectUsersTo(function () {
+            if (auth()->check()) {
+                return auth()->user()->role === 'admin'
+                    ? route('admin.dashboard')
+                    : route('patient.dashboard');
+            }
+            return route('login');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

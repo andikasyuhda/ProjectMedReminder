@@ -121,9 +121,9 @@
                             @if($log->is_overdue)
                                 <span class="badge badge-warning"><i class="fas fa-exclamation"></i> Terlambat</span>
                             @else
-                                <form action="{{ route('patient.compliance.taken', $log) }}" method="POST">
+                                <form id="form-{{ $log->id }}" action="{{ route('patient.compliance.taken', $log) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Konfirmasi bahwa obat sudah diminum?')">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="confirmMedicineTaken({{ $log->id }}, '{{ $log->schedule->medicine->name }}')">
                                         <i class="fas fa-check-circle"></i>
                                         Tandai Sudah Diminum
                                     </button>
@@ -189,3 +189,20 @@
 </div>
 @endif
 @endsection
+
+@push('scripts')
+<script>
+function confirmMedicineTaken(logId, medicineName) {
+    Modal.confirm(
+        'Konfirmasi Minum Obat',
+        `Apakah Anda sudah meminum <strong>${medicineName}</strong>?<br><br>Tindakan ini akan mencatat bahwa Anda telah meminum obat sesuai jadwal.`,
+        () => {
+            const form = document.getElementById('form-' + logId);
+            const button = form.querySelector('button');
+            showLoading(button);
+            form.submit();
+        }
+    );
+}
+</script>
+@endpush

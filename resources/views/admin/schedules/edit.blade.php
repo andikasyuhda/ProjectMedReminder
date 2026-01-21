@@ -72,7 +72,31 @@
             <label class="form-label">Catatan Khusus</label>
             <textarea name="notes" class="form-textarea" rows="3">{{ old('notes', $schedule->notes) }}</textarea>
         </div>
-        
+
+        <div class="divider" style="margin: 32px 0;"></div>
+
+        <!-- Email Reminder Toggle -->
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 20px; background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border-radius: 12px; border: 2px solid #3B82F6;">
+                <input type="checkbox" name="send_email_reminder" value="1" {{ $schedule->send_email_reminder ? 'checked' : '' }} style="width: 20px; height: 20px; accent-color: #3B82F6; cursor: pointer;">
+                <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 700; color: #1E40AF; margin-bottom: 4px;">
+                        <i class="fas fa-envelope"></i> Kirim Email Pengingat Otomatis
+                    </div>
+                    <div style="font-size: 13px; color: #1E3A8A;">
+                        Pasien akan menerima email pengingat 30 menit sebelum setiap waktu minum obat via Resend
+                    </div>
+                </div>
+            </label>
+        </div>
+
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Perhatian:</strong> Jika Anda mengubah waktu atau catatan, email notifikasi akan otomatis dikirim ke <strong>{{ $schedule->user->email }}</strong>
+            </div>
+        </div>
+
         <div style="display: flex; gap: 12px; margin-top: 24px;">
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Perubahan</button>
             <a href="{{ route('admin.schedules.index') }}" class="btn btn-secondary"><i class="fas fa-times"></i> Batal</a>

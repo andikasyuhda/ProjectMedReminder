@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PatientController as AdminPatientController;
 use App\Http\Controllers\Admin\MedicineController as AdminMedicineController;
 use App\Http\Controllers\Admin\ScheduleController as AdminScheduleController;
 use App\Http\Controllers\Admin\MonitoringController as AdminMonitoringController;
+use App\Http\Controllers\Admin\EmailController as AdminEmailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,4 +59,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Monitoring
     Route::get('/monitoring', [AdminMonitoringController::class, 'index'])->name('monitoring.index');
     Route::get('/monitoring/{patient}', [AdminMonitoringController::class, 'show'])->name('monitoring.show');
+
+    // Email Management
+    Route::get('/emails/create', [AdminEmailController::class, 'create'])->name('emails.create');
+    Route::post('/emails/send', [AdminEmailController::class, 'send'])->name('emails.send');
 });
